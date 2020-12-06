@@ -11,7 +11,7 @@ import random
 import torch
 from torch import nn, optim
 import torch.nn.functional as F
-import d2lzh_pytorch as d2l
+# import d2lzh_pytorch as d2l
 import time
 from tqdm import tqdm
 
@@ -148,6 +148,11 @@ def evaluate_accuracy(img, label, net):
         n += label.shape[0]
     return acc_sum / n
 
+class FlattenLayer(torch.nn.Module):
+    def __init__(self):
+        super(FlattenLayer, self).__init__()
+    def forward(self, x): # x shape: (batch, *, *, ...)
+        return x.view(x.shape[0], -1)
 
 if __name__ == '__main__':
     print("train:")
@@ -187,8 +192,8 @@ if __name__ == '__main__':
     net.add_module("resnet_block2", resnet_block(64, 128, 2))
     net.add_module("resnet_block3", resnet_block(128, 256, 2))
 
-    net.add_module("global_avg_pool", d2l.GlobalAvgPool2d())  # GlobalAvgPool2d的输出: (Batch, 512, 1, 1)
-    net.add_module("fc", nn.Sequential(d2l.FlattenLayer(), nn.Linear(256, 10)))
+    net.add_module("global_avg_pool", GlobalAvgPool2d())  # GlobalAvgPool2d的输出: (Batch, 512, 1, 1)
+    net.add_module("fc", nn.Sequential(FlattenLayer(), nn.Linear(256, 10)))
 
     # 测试网络
     X = torch.rand((1, 1, 28, 28))

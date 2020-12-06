@@ -7,7 +7,8 @@ import numpy as np
 import os
 from Pre_treatment import get_number as g_n
 import predict as pt
-
+from time import time
+from Pre_treatment import softmax
 net = pt.get_net()
 orig_path = r"F:\PyCharm\Practice\hand_wrtten\real_img_resize"
 img_list = os.listdir(orig_path)
@@ -15,6 +16,7 @@ img_list = os.listdir(orig_path)
 # img_path = r'F:\PyCharm\Practice\hand_wrtten\real_img\7.jpg'
 
 for img_name in img_list:
+    since = time()
     img_path = os.path.join(orig_path, img_name)
     img = cv.imread(img_path)
     img_bw = g_n(img)
@@ -39,4 +41,23 @@ for img_name in img_list:
     c = cv.waitKey(1) & 0xff
 
     img_in = cv.resize(img_bw_sg_bord, (28, 28))
-    pt.predict(img_in, img, net)
+    result_org = pt.predict(img_in,  net)
+    result = softmax(result_org)
+    best_result = result.argmax(dim=1).item()
+    best_result_num = max(max(result)).cpu().detach().numpy()
+    if best_result_num <= 0.5:
+        best_result = None
+
+    # 显示结果
+    img_show = cv.resize(img, (600, 600))
+    end_predict = time()
+    fps = np.ceil(1 / (end_predict - since))
+    font = cv.FONT_HERSHEY_SIMPLEX
+    cv.putText(img_show, "The number is:" + str(best_result), (1, 30), font, 1, (0, 0, 255), 2)
+    cv.putText(img_show, "Probability is:" + str(best_result_num), (1, 60), font, 1, (0, 255, 0), 2)
+    cv.putText(img_show, "FPS:" + str(fps), (1, 90), font, 1, (255, 0, 0), 2)
+    cv.imshow("result", img_show)
+    cv.waitKey(1)
+    print(result)
+    print("*" * 50)
+    print("The number is:", best_result)
