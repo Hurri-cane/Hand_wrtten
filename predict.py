@@ -12,7 +12,7 @@ import random
 import torch
 from torch import nn, optim
 import torch.nn.functional as F
-import d2lzh_pytorch as d2l
+
 
 
 
@@ -57,7 +57,11 @@ def resnet_block(in_channels, out_channels, num_residuals, first_block=False):
             blk.append(Residual(out_channels, out_channels))
     return nn.Sequential(*blk)
 
-
+class FlattenLayer(torch.nn.Module):
+    def __init__(self):
+        super(FlattenLayer, self).__init__()
+    def forward(self, x): # x shape: (batch, *, *, ...)
+        return x.view(x.shape[0], -1)
 def get_net():
     # 构建网络
     # ResNet模型
@@ -73,8 +77,8 @@ def get_net():
     net.add_module("resnet_block2", resnet_block(64, 128, 2))
     net.add_module("resnet_block3", resnet_block(128, 256, 2))
 
-    net.add_module("global_avg_pool", d2l.GlobalAvgPool2d())  # GlobalAvgPool2d的输出: (Batch, 512, 1, 1)
-    net.add_module("fc", nn.Sequential(d2l.FlattenLayer(), nn.Linear(256, 10)))
+    net.add_module("global_avg_pool", GlobalAvgPool2d())  # GlobalAvgPool2d的输出: (Batch, 512, 1, 1)
+    net.add_module("fc", nn.Sequential(FlattenLayer(), nn.Linear(256, 10)))
 
     # 测试网络
     # X = torch.rand((1, 1, 28, 28))

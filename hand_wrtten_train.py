@@ -11,7 +11,6 @@ import random
 import torch
 from torch import nn, optim
 import torch.nn.functional as F
-# import d2lzh_pytorch as d2l
 import time
 from tqdm import tqdm
 
