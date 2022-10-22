@@ -35,6 +35,8 @@ def get_roi(img_bw):
         for k, c in enumerate(img_bw_c):
             if c >= 5:
                 c_ind.append(k)
+        if len(r_ind)==0 or len(c_ind)==0:
+            return img_bw
         img_bw_sg = img_bw[c_ind[0]:c_ind[-1], r_ind[0]:r_ind[-1]]
         leng_c = len(c_ind)
         leng_r = len(r_ind)
